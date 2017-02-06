@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="comimoocdownload:war">
+    <output-path>$PROJECT_DIR$/target</output-path>
+    <root id="archive" name="com.imooc.download.war">
+      <element id="artifact" artifact-name="comimoocdownload:war exploded" />
+    </root>
+  </artifact>
+</component>
