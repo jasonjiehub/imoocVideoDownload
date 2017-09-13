@@ -1,5 +1,6 @@
 package com.immoc.controller;
 
+import com.immoc.constant.CommonConstant;
 import com.immoc.service.DownloadFile;
 import com.immoc.service.GetInput;
 import org.json.JSONArray;
@@ -13,21 +14,17 @@ import java.io.File;
 
 public class ImoocMain {
 
-    static int curruntCount;
-
-    static int curruntGlobalCount;
+    private static int curruntCount;
 
     public static void main(String[] args) throws Exception {
         while (true) {
             curruntCount = 0;
-            curruntGlobalCount = 0;
-
             int classNo = GetInput.getInputClassNo();
-            Document doc = Jsoup.connect("http://www.imooc.com/learn/" + classNo).get();
+            Document doc = Jsoup.connect(CommonConstant.IMOOC_VIDEO_URL + "learn/" + classNo).get();
             String title = doc.getElementsByTag("h2").html();
             Elements videos = doc.select(".video a");
             if ((title.equals("")) && (videos.size() == 0)) {
-                System.out.println("抱歉，没有该课程！\n");
+                System.out.println("抱歉，没有该课程!");
             } else {
                 int count = 0;
                 for (Element video : videos) {
@@ -37,14 +34,13 @@ public class ImoocMain {
                     }
                 }
 
-                System.out.print("\n要下载的课程标题为【" + title + "】，");
-                System.out.println("本次要下载的视频课程有 " + count + " 节\n");
-//                int videoDef = GetInput.getInputVideoDef();
+                System.out.println("要下载的课程标题为【" + title + "】");
+                System.out.println("本次要下载的视频课程有 " + count + " 节");
                 int videoDef = 0;   //这里默认下载超清的
                 String savePath = "./download/" + title + "/";
                 File file = new File(savePath);
                 file.mkdirs();
-                System.out.println("\n准备开始下载，请耐心等待…\n");
+                System.out.println("准备开始下载，请耐心等待…");
 
                 for (Element video : videos) {
                     String[] videoNos = video.attr("href").split("/");
@@ -56,26 +52,19 @@ public class ImoocMain {
                         videoName = videoName.substring(0, videoName.length() - 7).trim();
                         String videoNo = videoNos[2];
 
-                        Document jsonDoc = Jsoup.connect(
-                                "http://www.imooc.com/course/ajaxmediainfo/?mid=" +
-                                        videoNo + "&mode=flash").get();
+                        Document jsonDoc = Jsoup.connect(CommonConstant.IMOOC_VIDEO_URL + "course/ajaxmediainfo/?mid=" + videoNo + "&mode=flash").get();
                         String jsonData = jsonDoc.text();
 
                         JSONObject jsonObject = new JSONObject(jsonData);
-                        JSONArray mpath = jsonObject.optJSONObject("data")
-                                .optJSONObject("result").optJSONArray("mpath");
+                        JSONArray mpath = jsonObject.optJSONObject("data").optJSONObject("result").optJSONArray("mpath");
                         String downloadPath = mpath.getString(videoDef).trim();
-
-                        DownloadFile.downLoadFromUrl(downloadPath, videoName + ".mp4",
-                                savePath);
-
+                        DownloadFile.downLoadFromUrl(downloadPath, videoName + ".mp4", savePath);
                         curruntCount += 1;
-                        System.out.println("【" + curruntCount + "】：\t" + videoName +
-                                " \t下载成功！");
+                        System.out.println("【" + curruntCount + "】：\t" + videoName + "\t下载成功！");
                     }
                 }
 
-                System.out.println("\n恭喜！【" + title + "】课程的所有视频已经下载完成！！！下载的文件在该程序所在目录下的download文件夹中。\n-------------------------------------------------------\n");
+                System.out.println("恭喜！【" + title + "】课程的所有视频已经下载完成！！！下载的文件在该程序所在目录下的download文件夹中。");
             }
         }
     }
